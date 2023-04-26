@@ -12,7 +12,7 @@ pipeline {
       stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('Sonarqube') {
-        sh 'mvn clean verify sonar:sonar  -Dsonar.projectKey=Mule-Sec-Ops-Sonar  -Dsonar.projectName=Mule-Sec-Ops-Sonar   -Dsonar.host.url=https://wet-foxes-cough-49-206-50-202.loca.lt  -Dsonar.token=sqp_3c029237d556c67b14ecda6f62d912b72b43adce -Dsonar.sources=src/'
+        sh 'mvn clean verify sonar:sonar  -Dsonar.projectKey=Mule-Sec-Ops-Sonar  -Dsonar.projectName=Mule-Sec-Ops-Sonar   -Dsonar.host.url=http://sonarqube:9000  -Dsonar.token=sqp_3c029237d556c67b14ecda6f62d912b72b43adce -Dsonar.sources=src/'
       } 
     }
     }
