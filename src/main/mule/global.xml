@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<api-gateway:autodiscovery apiId="18654669" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="88c49db7-a347-424d-94ac-5a42c928247d" flowRef="users-exp-api-main" />
+	<http:request-config name="HTTP_Request_Configuration" doc:name="HTTP Request configuration" doc:id="8a6369e2-980f-4e1f-9b24-f29c2a3c74e0" basePath="/api" >
+		<http:request-connection protocol="HTTPS" host="reqres.in" port="443" />
+	</http:request-config>
+</mule>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="51cdf66f-d4a0-4f15-b8fb-71d0a6ad226d" >
+		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
+	</db:config>
+	<flow name="get-flights" doc:id="3402c501-f50e-448a-8ca3-d9cb7122873b" >
+		<http:listener doc:name="Listener" doc:id="eedcb0ae-6e76-4d8a-8fff-244c00740cac" config-ref="users-exp-api-httpListenerConfig" path="/flights"/>
+		<db:select doc:name="Select" doc:id="92ff5a68-8242-4793-a8c5-7c3102ec2347" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from american]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="f15b04da-a6cf-4edd-a13c-2358568b6ec8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	id: payload01.ID,
+	airline: upper(payload01.airlineName default ""),
+	destination: payload01.toAirport default "",
+	current: payload01.fromAirport default "",
+	price: "\$" ++ payload01.price default 0
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+
+	</flow>
+	<sub-flow
+		name="set-id-variable-1"
+		doc:id="d8d47d6c-d2c1-475b-a536-fce39557aaeb">
+		<set-variable
+			value="#[vars.id]"
+			doc:name="Set User ID Variable"
+			doc:id="992a3f9f-f3bc-498e-85c4-34a7a6c421f3"
+			variableName="usersID" />
+	</sub-flow>
+	<flow name="get-users-" doc:id="af1f816b-8760-4254-a149-4dcca1382cbf" >
+		<http:request method="GET" 
+		doc:name="HTTP ReqRes" 
+		doc:id="0dd5aa7d-e3bf-4538-9aa0-a01f8c8a868e" 
+		config-ref="HTTP_Request_Configuration" 
+		url="/users"/>
+	</flow>
+	<flow name="register-user" doc:id="35c3ea44-d0f7-45cb-8577-6a9d07eaa044" >
+		<http:request method="POST" doc:name="HTTP ReqRes" doc:id="c375ea4d-356c-45a6-b971-cea7eb75a462" config-ref="HTTP_Request_Configuration" url="/register" />
+	</flow>
+	<flow name="get-users-by-id" doc:id="e165a7e3-5893-49c4-b3b2-5e974ec8d780" >
+		<http:request method="GET" doc:name="HTTP ReqRes" doc:id="f18a7257-5b73-4af8-accc-1c4d0a218369" config-ref="HTTP_Request_Configuration" url="/users/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="update-users-by-id" doc:id="981a9047-5c19-497c-a81a-1fe62f146515" >
+		<http:request method="PUT" doc:name="HTTP ReqRes" doc:id="72dc3a26-c45b-4560-938c-d8e8e7cd31c3" config-ref="HTTP_Request_Configuration" url="/users/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="patch-users-by-id" doc:id="51f63235-784a-404f-b907-bcbccdc8b3b1" >
+		<http:request method="PATCH" doc:name="HTTP ReqRes" doc:id="5fed79bd-3ba8-4218-ae35-cb61cbddd83c" config-ref="HTTP_Request_Configuration" url="/users/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="delete-users-by-id" doc:id="6d354610-322e-43ae-94f7-acdb83a9ba18" >
+		<http:request method="DELETE" doc:name="HTTP ReqRes" doc:id="1826d3dd-3adf-4560-b462-188849db1e04" config-ref="HTTP_Request_Configuration" url="/users/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="get-color-by-id" doc:id="dabeed0c-1f78-4406-80db-25cdc4a2e387">
+		<http:request method="GET" doc:name="HTTP ReqRes" doc:id="7e15f8a5-ccd0-4ab3-8fc4-9bf24d0b3fb9" config-ref="HTTP_Request_Configuration" url="/color/{id}">
+			<http:uri-params><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="patch-color-by-id" doc:id="d49b31db-734a-43b1-af90-a4ee84378000" >
+		<http:request method="PATCH" doc:name="HTTP ReqRes" doc:id="51efd734-7365-42c3-a46e-d1f652cb34a8" config-ref="HTTP_Request_Configuration" url="/color/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="update-color-by-id" doc:id="0178881e-707a-4fcc-a142-da3b98b7fe97" >
+		<http:request method="PUT" doc:name="HTTP ReqRes" doc:id="44fc3e5c-fb88-4621-9fb4-e80b6c4374aa" config-ref="HTTP_Request_Configuration" url="/color/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="delete-color-by-id" doc:id="06d9ea64-3809-4ed5-88dd-b908d636a445" >
+		<http:request method="DELETE" doc:name="HTTP ReqRes" doc:id="dd334e89-3c14-417a-bafb-d7be16b6c23a" config-ref="HTTP_Request_Configuration" url="/color/{id}" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="logout" doc:id="ff6c587a-71db-4cf0-a4c6-805d9baeb860" >
+		<http:request method="POST" doc:name="HTTP ReqRes" doc:id="4b73694e-b417-452d-85fe-672dc12790ea" config-ref="HTTP_Request_Configuration" url="logout" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+	<flow name="login" doc:id="e8095d27-7d48-405e-9d7b-160d757c22b5" >
+		<http:request method="POST" doc:name="HTTP ReqRes" doc:id="9b4655ba-0900-45b8-a24f-8c6b05d63eff" config-ref="HTTP_Request_Configuration" url="login" >
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"id" : vars.userID
+}]]]></http:uri-params>
+		</http:request>
+	</flow>
+</mule>

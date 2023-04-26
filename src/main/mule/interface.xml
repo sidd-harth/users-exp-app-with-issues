@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+	<http:listener-config
+		name="users-exp-api-httpListenerConfig">
+		<http:listener-connection
+			host="0.0.0.0"
+			port="8081" />
+	</http:listener-config>
+	<apikit:config
+		name="users-exp-api-config"
+		api="users-exp-api.raml"
+		outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+	<flow name="users-exp-api-main">
+		<http:listener
+			config-ref="users-exp-api-httpListenerConfig"
+			path="/api/*">
+			<http:response
+				statusCode="#[vars.httpStatus default 200]">
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:response>
+			<http:error-response
+				statusCode="#[vars.httpStatus default 500]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:router config-ref="users-exp-api-config" />
+		<error-handler>
+			<on-error-propagate type="APIKIT:BAD_REQUEST">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">400
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_FOUND">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">404
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate
+				type="APIKIT:METHOD_NOT_ALLOWED">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">405
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">406
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate
+				type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">415
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">501
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="users-exp-api-console">
+		<http:listener
+			config-ref="users-exp-api-httpListenerConfig"
+			path="/console/*">
+			<http:response
+				statusCode="#[vars.httpStatus default 200]">
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:response>
+			<http:error-response
+				statusCode="#[vars.httpStatus default 500]">
+				<http:body>#[payload]</http:body>
+				<http:headers>#[vars.outboundHeaders default {}]</http:headers>
+			</http:error-response>
+		</http:listener>
+		<apikit:console config-ref="users-exp-api-config" />
+		<error-handler>
+			<on-error-propagate type="APIKIT:NOT_FOUND">
+				<ee:transform>
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus">404
+						</ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow
+		name="put:\users\(id):users-exp-api-config"
+		doc:id="75e4b4bd-f332-4a37-9636-549c02bc3dbb">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="put:\users\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="0882f9c1-7345-46f1-918a-b5c393177c0d"
+			name="update-users-by-id" />
+	</flow>
+	<flow name="put:\resource\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="put:\resource\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="6064b002-f259-4ade-9c3e-16a7860ad906"
+			name="update-color-by-id" />
+	</flow>
+	<flow name="delete:\resource\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="delete:\resource\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="42780900-06b1-4bce-8d1b-79352bd797a6"
+			name="delete-color-by-id" />
+	</flow>
+	<flow name="delete:\users\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="delete:\users\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="16dca549-f229-46bc-9db4-277734d758a1"
+			name="delete-users-by-id" />
+	</flow>
+	<flow name="patch:\users\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" message="patch:\users\(id):users-exp-api-config" />
+		<flow-ref doc:name="" doc:id="d4782347-c2b4-45b5-bb3a-e1a25a2bf695" name="patch-users-by-id" />
+    </flow>
+	<flow name="patch:\resource\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="patch:\resource\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="722867f3-54d0-48de-ba7a-9081d3ad7b63"
+			name="patch-color-by-id" />
+	</flow>
+	<flow name="get:\resource:users-exp-api-config">
+		<logger
+			level="INFO"
+			message="get:\resource:users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="dcee96a6-9a2b-4a5c-acef-934ec0074778"
+			name="patch-users-by-id" />
+	</flow>
+	<flow name="get:\users:users-exp-api-config">
+		<logger
+			level="INFO"
+			message="get:\users:users-exp-api-config" />
+	</flow>
+	<flow name="get:\resource\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="get:\resource\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="6e3a9b3e-b02f-486d-bc5f-d6c135ab3ac7"
+			name="get-color-by-id" />
+	</flow>
+	<flow name="get:\users\(id):users-exp-api-config">
+		<ee:transform>
+			<ee:variables>
+				<ee:set-variable variableName="id">attributes.uriParams.'id'
+				</ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger
+			level="INFO"
+			message="get:\users\(id):users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="5946a0af-a47c-4338-8487-c39c55aae98f"
+			name="get-users-by-id" />
+	</flow>
+	<flow name="post:\login:users-exp-api-config">
+		<logger
+			level="INFO"
+			message="post:\login:users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="50f33c85-ba6d-4982-8a8f-fe5324cf5461"
+			name="register-user" />
+	</flow>
+	<flow name="post:\logout:users-exp-api-config">
+		<logger
+			level="INFO"
+			message="post:\logout:users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="9e428787-cc73-4571-a09b-70a6f0722640"
+			name="logout" />
+	</flow>
+	<flow name="post:\users:users-exp-api-config">
+		<logger
+			level="INFO"
+			message="post:\users:users-exp-api-config" />
+		<flow-ref
+			doc:name=""
+			doc:id="7726e02c-4a43-41e8-9268-247d7455bdca"
+			name="register-user" />
+	</flow>
+</mule>
