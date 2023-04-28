@@ -40,6 +40,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="651cbb95-158a-423d-a9c4-8b988143093b" />
 
 	</flow>
 	<sub-flow
