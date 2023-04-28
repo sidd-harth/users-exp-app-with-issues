@@ -4,12 +4,22 @@
 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="51cdf66f-d4a0-4f15-b8fb-71d0a6ad226d" >
-		<db:my-sql-connection host="mudb.learn.mulesoft.com" port="3306" user="mule" password="mule" database="training" />
+	<db:config
+		name="Database_Config"
+		doc:name="Database Config"
+		doc:id="51cdf66f-d4a0-4f15-b8fb-71d0a6ad226d">
+		<db:my-sql-connection
+			host="mudb.learn.mulesoft.com"
+			port="3306"
+			user="mule"
+			password="mule"
+			database="training" />
 	</db:config>
 	<flow name="get-flights" doc:id="3402c501-f50e-448a-8ca3-d9cb7122873b" >
 		<http:listener doc:name="Listener" doc:id="eedcb0ae-6e76-4d8a-8fff-244c00740cac" config-ref="users-exp-api-httpListenerConfig" path="/flights"/>

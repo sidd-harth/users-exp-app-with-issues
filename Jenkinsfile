@@ -11,15 +11,15 @@ pipeline {
   
       stage('SonarQube Analysis') {
       steps {
-        withSonarQubeEnv('Sonarqube') {
-        sh 'mvn clean verify sonar:sonar  -Dsonar.projectKey=Mule-Sec-Ops-Sonar  -Dsonar.projectName=Mule-Sec-Ops-Sonar   -Dsonar.host.url=http://sonarqube:9000  -Dsonar.token=sqp_3c029237d556c67b14ecda6f62d912b72b43adce -Dsonar.sources=src/'
+        withSonarQubeEnv('SonarQube') {
+        sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=MuleSecOps -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqp_1c5ac3c8bef860f28b73b394a7aab499e0d10b78 -Dsonar.sources=src/'
       } 
     }
     }
 
     stage('SonarQube Quality Gate') {
       steps {
-        withSonarQubeEnv('Sonarqube') {
+        withSonarQubeEnv('SonarQube') {
           timeout(time: 2, unit: 'MINUTES') {
              script {
                waitForQualityGate abortPipeline: true
